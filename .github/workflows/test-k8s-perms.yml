@@ -11,7 +11,7 @@ jobs:
         uses: azure/k8s-set-context@v4
         with:
           method: service-account
-          k8s-url: https://35.94.250.230:6443     # Replace this IP address with the results of curl http://checkip.amazonaws.com
+          k8s-url: https://3.135.225.47:6443     # Replace this IP address with the results of curl http://checkip.amazonaws.com
           k8s-secret: |                           # Replace the example secret below with the secret from your cluster
             apiVersion: v1
             data:
