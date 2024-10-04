@@ -2,6 +2,11 @@ name: deploy-to-k8s
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment where Kubernetes resources will be deployed'
+        type: environment
+        required: true
 
 jobs:
   deploy-static-manifests:
@@ -44,5 +49,5 @@ jobs:
           manifests: |
               manifests/dep.yaml
               manifests/svc.yaml
-          namespace: default
+          namespace: ${{ inputs.environment }}
           pull-images: false
