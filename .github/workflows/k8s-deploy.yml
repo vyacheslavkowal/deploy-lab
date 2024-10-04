@@ -1,0 +1,48 @@
+name: deploy-to-k8s 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-static-manifests:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up kubeconfig
+        uses: azure/k8s-set-context@v4
+        with:
+          method: service-account
+          k8s-url: https://3.135.225.47:6443     # Replace this IP address with the results of curl http://checkip.amazonaws.com
+          k8s-secret: |                           # Replace the example secret below with the secret from your cluster
+            apiVersion: v1
+            data:
+              ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJWVdkdnFva3NXOFF3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRFd01EUXhPVEUyTXpkYUZ3MHpOREV3TURJeE9USXhNemRhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURuOUVSMFFkVk9semd5c1pDeC9HQUdnVGtwR0R3NVM3MGJ5L1Y3NWZacjI2eVFNZStnNzl2Y05QNCsKSVBOeFQ1NWJrNlM3eEV6ZUVXVnVpcjY3dzBCbFN4ajlBTFRvUk5ZNlMycGhpMTdaL1dyd3dRNEJYeU01a1k3QwphelVWQUZzeEUxdlVFVjBjOFJJTGNRaXFWbmIwZWYrYzBKVHpZWWQ5dzhsdnV1L1hXRllPK0psYWNXRHhHTXVCCjBBaGRCWngrSllQZWtPZHJ0YkpDYjFDc0FaY1ZseEt0OHRES3BUNHl3U2NVWUVOMEJnMW5LWjNrclFPMkduVVYKL0ZXalBiWTczTGkzQXFoMnA2QVVQUXNEQ3gyZ1RzaFIzT3UwNDNFNTg3VDFQbkY4dE1zQkZkcnMvZG1jV0g4NApBYnlxRFYrWU8rR2pwYldUNVJiSE93L0JrN3dYQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJTSmdra0k2NmVJSHo4RlRHajE3b2w1bmprNHdUQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRRGdiN2hrN0ZJNgpVMzVPMkd6VXpSUHJKNTN2a2g3Q1FhU2hJRnhudnROb2lHTkt6V3l0dXNVNlFOM3FyWXk0RlJDTW0wek9JcUFSCjkwWWJiNndUVzE0eWlEK0Z6R0NMcjhmOSt4VFpGOHhaVSthdnpyYzAySFJ4Rk9YM1JwblE0VC9ZK0V0a1lYK0MKcXplcVMyRS9IV2lTZUJTbEFPazBoNUVUQlR3ZGlEMUNDaXVoenRNRHVWelVEM0ovM3hUU01INU0ranlTVS9WVQpuTlg0Z1ZMZHBVcjh6YUQ2YndaVFVOOFVyeFJ5UU5qUldFTktDOXRxc2ZRbWQwMjZudzIxUk1Ja2FxOEdkcmg1CmpvaER6MC90SDU5K2VPZGNsSW9haHl2UnJudG1EZVFGdXcvVDlBeDFLT0NOdmI0dE9lc0lHZXJaWFoxQlB3V3EKTWFZZWtucExUUVVOCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+              namespace: ZGVmYXVsdA==
+              token: ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkluUjBWVUZpTlZaVVpYZE1OMWxqTlhJNFMwNTFWbGRFTkc1bGJtbGlNM1p0TVdkaFpXRkRUR3BhV2xFaWZRLmV5SnBjM01pT2lKcmRXSmxjbTVsZEdWekwzTmxjblpwWTJWaFkyTnZkVzUwSWl3aWEzVmlaWEp1WlhSbGN5NXBieTl6WlhKMmFXTmxZV05qYjNWdWRDOXVZVzFsYzNCaFkyVWlPaUprWldaaGRXeDBJaXdpYTNWaVpYSnVaWFJsY3k1cGJ5OXpaWEoyYVdObFlXTmpiM1Z1ZEM5elpXTnlaWFF1Ym1GdFpTSTZJbWRvWVMxellTMXpaV055WlhRaUxDSnJkV0psY201bGRHVnpMbWx2TDNObGNuWnBZMlZoWTJOdmRXNTBMM05sY25acFkyVXRZV05qYjNWdWRDNXVZVzFsSWpvaVoyaGhJaXdpYTNWaVpYSnVaWFJsY3k1cGJ5OXpaWEoyYVdObFlXTmpiM1Z1ZEM5elpYSjJhV05sTFdGalkyOTFiblF1ZFdsa0lqb2lOR0k1WkRjeFlXRXRORFJsWlMwME1URTBMVGswTXpFdE56WTFaV1EwWXpNeU1ERmlJaXdpYzNWaUlqb2ljM2x6ZEdWdE9uTmxjblpwWTJWaFkyTnZkVzUwT21SbFptRjFiSFE2WjJoaEluMC5OSlcxeGVhamlBdkZHQnhFNWtGaGYzbDROcC1SYkpwRG4zWTNVRzh1NjJFbnNYMUcwQU05TmYxdVZHRmRoRXl4U1E5b3ZjUGVCSGJGS0gxWlJSX2wtQnJpdG9pTXFSMDh5MXRTOUxRaHNtdEpzS2tyU0tDa2RxUzJfOXh1ejdSRDJWRXljR2Z0UFZSUWstOTJGVzYwSlktX0lTZm84MUpOQmQxSlVTQXliQVFUNGJHa2FNT1g5eDN3dFBkNGVsUmV1RlJmOTNBTWpQWktXZkFHMFpvZ21tY1M5QWtnTUNqZHVCcURCZjNiazB3X2U2S3NhRW5YT2xWazNTV0g0NS04akZ5ZDJYNlRHbmd5ZHNJVnhGN1hnWVhPTVV2UWYyOGU5RHhqdWdvaUdfLTRpWnhRa0huUDh2SlZkRlRTeEVOUGxYclFPNFFEUUVtV2haTFVfQXczMFE=
+            kind: Secret
+            metadata:
+              annotations:
+                kubectl.kubernetes.io/last-applied-configuration: |
+                  {"apiVersion":"v1","kind":"Secret","metadata":{"annotations":{"kubernetes.io/service-account.name":"gha"},"name":"gha-sa-secret","namespace":"default"},"type":"kubernetes.io/service-account-token"}
+                kubernetes.io/service-account.name: gha
+                kubernetes.io/service-account.uid: 0f4a4110-5f11-462c-af70-8f514889d8f5
+              creationTimestamp: "2024-10-01T23:52:36Z"
+              name: gha-sa-secret
+              namespace: default
+              resourceVersion: "680"
+              uid: 4c1c3b23-ac06-4580-b1cc-3822b681fdcf
+            type: kubernetes.io/service-account-token
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Deploy manifests
+        uses: azure/k8s-deploy@v4
+        with:
+          action: deploy
+          manifests: |
+              manifests/dep.yaml
+              manifests/svc.yaml
+          namespace: default
+          pull-images: false

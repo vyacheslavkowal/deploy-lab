@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: static
+  name: static
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: static
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: static
+    spec:
+      containers:
+      - image: docker.io/library/nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+        resources: {}
+status: {}
