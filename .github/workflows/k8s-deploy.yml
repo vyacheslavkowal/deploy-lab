@@ -8,6 +8,10 @@ on:
         type: environment
         required: true
 
+concurrency:                          # Add the concurrency block
+  group: ${{ inputs.environment }}    # Uses the input variable
+  cancel-in-progress: false           # Set to false to prevent interrupting any deployments in progress
+
 jobs:
   deploy-static-manifests:
     permissions:
