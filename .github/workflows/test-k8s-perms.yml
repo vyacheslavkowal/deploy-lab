@@ -1,0 +1,36 @@
+name: test-k8s-permissions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up kubeconfig
+        uses: azure/k8s-set-context@v4
+        with:
+          method: service-account
+          k8s-url: https://35.94.250.230:6443     # Replace this IP address with the results of curl http://checkip.amazonaws.com
+          k8s-secret: |                           # Replace the example secret below with the secret from your cluster
+            apiVersion: v1
+            data:
+              ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0 ...
+              namespace: ZGVmYXVsdA==
+              token: ZXlKaGJHY2lPaUpTVXpJMU5pSXN ...
+            kind: Secret
+            metadata:
+              annotations:
+                kubectl.kubernetes.io/last-applied-configuration: |
+                  {"apiVersion":"v1","kind":"Secret","metadata":{"annotations":{"kubernetes.io/service-account.name":"gha"},"name":"gha-sa-secret","namespace":"default"},"type":"kubernetes.io/service-account-token"}
+                kubernetes.io/service-account.name: gha
+                kubernetes.io/service-account.uid: 0f4a4110-5f11-462c-af70-8f514889d8f5
+              creationTimestamp: "2024-10-01T23:52:36Z"
+              name: gha-sa-secret
+              namespace: default
+              resourceVersion: "680"
+              uid: 4c1c3b23-ac06-4580-b1cc-3822b681fdcf
+            type: kubernetes.io/service-account-token
+      - name: Get pods
+        run: kubectl get pods -n default
+
